@@ -1,36 +1,41 @@
-"use client";
+'use client';
 
-import { z } from "zod";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { useForm } from 'react-hook-form';
 
-import { loginSchema } from "@/features/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import TextSeparator from "./TextSeparator";
-import Link from "next/link";
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import GithubSignIn from '@/components/ui/github-sign-in';
+import GoogleSignIn from '@/components/ui/google-sign-in';
+import { Input } from '@/components/ui/input';
+
+import { loginSchema } from '@/features/schemas';
+
+import TextSeparator from './TextSeparator';
 
 const SignInForm = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    console.log("Form: ", values);
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const res = await signIn('credentials', {
+      ...values,
+      redirect: true,
+      callbackUrl: '/',
+    });
+
+    console.log('🔍 Login result:', res);
   };
 
   return (
@@ -48,11 +53,7 @@ const SignInForm = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Enter email address"
-                    />
+                    <Input {...field} type="email" placeholder="Enter email address" />
                   </FormControl>
                 </FormItem>
               )}
@@ -65,11 +66,7 @@ const SignInForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="Enter password"
-                    />
+                    <Input {...field} type="password" placeholder="Enter password" />
                   </FormControl>
                 </FormItem>
               )}
@@ -82,17 +79,11 @@ const SignInForm = () => {
         </Form>
       </CardContent>
       <div className="px-7">
-        <TextSeparator text="OR" />
+        <TextSeparator text="Or continue with" />
       </div>
       <CardContent className="p-7 flex flex-col gap-y-4">
-        <Button>
-          <FcGoogle />
-          Login with Google
-        </Button>
-        <Button>
-          <FaGithub />
-          Login with Github
-        </Button>
+        <GoogleSignIn />
+        <GithubSignIn />
       </CardContent>
       <CardContent className="flex items-center justify-center p-7">
         Don&apos;t have an account?
